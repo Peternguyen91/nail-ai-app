@@ -1,0 +1,18 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# System deps for OpenCV / MediaPipe
+RUN apt-get update && apt-get install -y \
+    libglib2.0-0 libgl1-mesa-glx libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 8000
+
+# Railway injects $PORT dynamically; fallback to 8000 for local Docker
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
